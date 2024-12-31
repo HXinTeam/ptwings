@@ -76,6 +76,7 @@ func Configure(m *wserver.Manager, client remote.Client) *gin.Engine {
 		server.POST("/commands", postServerCommands)
 		server.POST("/install", postServerInstall)
 		server.POST("/reinstall", postServerReinstall)
+		server.POST("/import", postServerImport)
 		server.POST("/sync", postServerSync)
 		server.POST("/ws/deny", postServerDenyWSTokens)
 
