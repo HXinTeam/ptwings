@@ -211,3 +211,12 @@ func (c *client) getServersPaged(ctx context.Context, page, limit int) ([]RawSer
 	}
 	return r.Data, r.Meta, nil
 }
+
+func (c *client) SetImportStatus(ctx context.Context, uuid string, successful bool) error {
+	resp, err := c.Get(ctx, fmt.Sprintf("/servers/%s/import", uuid), nil)
+	if err != nil {
+		return err
+	}
+	_ = resp.Body.Close()
+	return nil
+}
