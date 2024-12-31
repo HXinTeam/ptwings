@@ -261,3 +261,35 @@ func postServerDenyWSTokens(c *gin.Context) {
 
 	c.Status(http.StatusNoContent)
 }
+
+// Reinstalls a server.
+func postServerImport(c *gin.Context) {
+	s := ExtractServer(c)
+	var data struct {
+		User        string `json:"user"`
+		Password    string `json:"password"`
+		Hote        string `json:"hote"`
+		Port        int    `json:"port"`
+		Srclocation string `json:"srclocation"`
+		Dstlocation string `json:"dstlocation"`
+		Wipe        bool   `json:"wipe"`
+		Type        string `json:"type"`
+	}
+	if err := c.BindJSON(&data); err != nil {
+		middleware.CaptureAndAbort(c, err)
+
+	}
+	if s.ExecutingPowerAction() {
+		c.AbortWithStatusJSON(http.StatusConflict, gin.H{
+			"error": "Cannot execute server import event while another power action is running.",
+		})
+		return
+	}
+	go func(s *server.Server) {
+		if err := s.ImportNew(data.User, data.Password, data.Hote, data.Port, data.Srclocation, data.Dstlocation, data.Type, data.Wipe); err != nil {
+			s.Log().WithField("error", err).Error("failed to complete server import process")
+
+		}
+	}(s)
+	c.Status(http.StatusAccepted)
+}
